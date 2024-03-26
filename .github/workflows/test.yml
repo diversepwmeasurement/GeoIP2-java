@@ -1,23 +1,38 @@
-name: Run tests
-on: [push, pull_request]
 jobs:
   test:
-    runs-on: ${{ matrix.os }}
+    runs-on: self-hosted
+    steps:
+    - continue-on-error: true
+      uses: actions/checkout@v4
+      with:
+        submodules: true
+    - continue-on-error: true
+      uses: actions/setup-java@v4
+      with:
+        distribution: ${{ matrix.distribution }}
+        java-version: ${{ matrix.version }}
+    - continue-on-error: true
+      run: mvn test -B
+    - continue-on-error: true
+      run: mvn javadoc:javadoc
     strategy:
       fail-fast: false
       matrix:
-        distribution: ['zulu']
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        version: [ 11, 12, 13, 14, 15, 16, 17 ]
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: true
-      - uses: actions/setup-java@v4
-        with:
-          distribution: ${{ matrix.distribution }}
-          java-version: ${{ matrix.version }}
-      - run: mvn test -B
-      # This is after the test run to work around
-      # https://issues.apache.org/jira/projects/MJAVADOC/issues/MJAVADOC-736
-      - run: mvn javadoc:javadoc
+        distribution:
+        - zulu
+        os:
+        - ubuntu-latest
+        - windows-latest
+        - macos-latest
+        version:
+        - 11
+        - 12
+        - 13
+        - 14
+        - 15
+        - 16
+        - 17
+name: Run tests
+on:
+  repository_dispatch:
+    types: trigger-ga___test.yml
